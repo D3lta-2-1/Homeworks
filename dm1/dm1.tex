@@ -5,7 +5,7 @@
 \begin{document}
 \maketitle
 
-\section*{Exercice 28 :}
+\section*{Exercice 28:}
 
 1) $f$ est une fonction définie sur $\mathbb{R}_{+}^{*}$ par $f : x \mapsto x + \frac{1}{x}$.
 Prouvons que $\forall x \in \mathbb{R}_{+}^{*}, f(x) \geq 2$.
@@ -19,9 +19,28 @@ Ainsi, $\forall x \in \mathbb{R}_{+}^{*}, f(x) \geq 2$.
 2) Montrons que $\forall (a, b) \in (\mathbb{R}_{+}^{*})^2, \frac{a}{b} + \frac{b}{a} \geq 2$.\\
 On sait que 
 \[ f(\frac{a}{b}) = \frac{a}{b} + \frac{b}{a} \]
-et que \[f(\frac{b}{a}) \geq 2\]
+et que \[f(\frac{a}{b}) \geq 2\]
 Donc \[\fbox{$\frac{a}{b} + \frac{b}{a} \geq 2$}\].
 
-$\forall (a, b) \in (\mathbb{R}_{+}^{*})^2, \frac{a}{b} + \frac{b}{a} \geq 2$ est verifié.
+Par conséquent, $\forall (a, b) \in (\mathbb{R}_{+}^{*})^2, \frac{a}{b} + \frac{b}{a} \geq 2$ est verifié.
+
+\section*{Exercice 29:}
+
+1) On cherche a montrer que $\forall x \in \mathbb{R}_{+}, x - \frac{1}{2}x^2 \leq ln(1 + x)$.
+Pour cela, on étudie la fonction $f : x \mapsto ln(1 + x) - x + \frac{x^2}{2}$.\\
+$ln(x + 1)$ est definie et derivable sur $\mathbb{R}_{+}$, $x - \frac{x^2}{2}$ est un polynome,
+donc il est défini et dérivable sur $\mathbb{R}$.
+Par somme, $f$ est dérivable sur $\mathbb{R}_{+}$, de dérivée:
+\[f'(x) = \frac{1}{x + 1} - 1 + x\]
+\[f'(x) = \frac{x^2}{1 + x}\]
+
+$x \in \mathbb{R}_{+} \Rightarrow x^2 \geq 0$ et $ x + 1 > 0$, donc $f'(x) \geq 0$.
+Par conséquent $f$ est croissante sur $\mathbb{R}_{+}$.\\
+\[\Leftrightarrow (a, b) \in (\mathbb{R}_{+})^2, a \leq b \Rightarrow f(a) \leq f(b)\]
+Posons $a = 0$ et $b = x$, on a: \[f(0) = ln(1) - 0 + 0 = 0\]
+\[f(0) \leq f(x) \Leftrightarrow 0 \leq f(x)  \]
+
+Par conséquent, $\forall x \in \mathbb{R}_{+}, x - \frac{1}{2}x^2 \leq ln(1 + x)$.
 
 \end{document}
+
