@@ -26,7 +26,7 @@ Par conséquent, $\forall (a, b) \in (\mathbb{R}_{+}^{*})^2, \frac{a}{b} + \frac
 
 \section*{Exercice 29:}
 
-1) On cherche a montrer que $\forall x \in \mathbb{R}_{+}, x - \frac{1}{2}x^2 \leq ln(1 + x)$.
+1) On cherche a montrer que $\forall x \in \mathbb{R}_{+}, x - \frac{1}{2}x^2 \leq ln(1 + x) \leq x$.
 Pour cela, on étudie la fonction $f : x \mapsto ln(1 + x) - x + \frac{x^2}{2}$.\\
 $ln(x + 1)$ est definie et derivable sur $\mathbb{R}_{+}$, $x - \frac{x^2}{2}$ est un polynome,
 donc il est défini et dérivable sur $\mathbb{R}$.
@@ -40,7 +40,28 @@ Par conséquent $f$ est croissante sur $\mathbb{R}_{+}$.\\
 Posons $a = 0$ et $b = x$, on a: \[f(0) = ln(1) - 0 + 0 = 0\]
 \[f(0) \leq f(x) \Leftrightarrow 0 \leq f(x)  \]
 
-Par conséquent, $\forall x \in \mathbb{R}_{+}, x - \frac{1}{2}x^2 \leq ln(1 + x)$.
+On procède de la même manière pour comparer $ln(1 + x)$ et $x$.
+Soit $g : x \mapsto x - ln(1 + x)$.
+$g$ estla somme de $ln(x +1)$ et de l'identité, elle donc dérivable sur $\mathbb{R}_{+}$
+\[g'(x) = 1 - \frac{1}{1 + x}\]
+\[= \frac{x}{1 + x}\]
+$ x \in \mathbb{R}_{+} \Rightarrow x \geq 0$ et $x + 1 > 0$, donc \fbox{$g'(x) \geq 0$}.
+$g(0)= 0 - ln(1) = 0$, donc $g(0) \leq g(x) \Leftrightarrow 0 \leq g(x)$.
+
+Par conséquent, $\forall x \in \mathbb{R}_{+}, x - \frac{1}{2}x^2 \leq ln(1 + x) \leq x$.
+
+2) Cherchons la limite de $ln((1 + \frac{x}{n})^n)$ quand $n$ tend vers $+ \infty$.
+\[ln((1 + \frac{x}{n})^n) = n ln(1 + \frac{x}{n}) \]
+
+En utilisant l'inégualité de la question 1, on a:
+\[ n(\frac{x}{n} - \frac{ (\frac{x}{n})^2 }{2}) \leq n ln(1 + \frac{x}{n}) \leq n \frac{x}{n} \]
+\[ x - \frac{x^2}{2n} \leq n ln(1 + \frac{x}{n}) \leq x \]
+
+$\lim\limits_{ n \to +\infty} x - \frac{x^2}{2n} = x $ et $ \lim\limits_{ n \to +\infty} x = x$
+donc d'après le théorème des gendarmes, $\lim\limits_{ n \to +\infty} n ln(1 + \frac{x}{n}) = x$.
+
+donc par composition: $\lim\limits_{ n \to +\infty} e^{n ln(1 + \frac{x}{n})} = e^x$,
+donc \fbox{$\lim\limits_{ n \to +\infty} (1 + \frac{x}{n})^n = e^x$}.
 
 \end{document}
 
