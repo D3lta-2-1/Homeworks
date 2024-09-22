@@ -7,17 +7,22 @@ def resistance(U, I):
 
 
 def main():
-    U, d_U = 12.0, 0.14
-    I, d_I = 0.5, 0.005
-    
-    N = 100000
+    U, d_U = 200, 0.1
+    I, d_I = 1.6, 0.005
 
+    # intervalle de conf
+    racine_3 = np.sqrt(3)
+    U_omega = np.sqrt((d_U / racine_3) ** 2 + (d_I / racine_3) ** 2)
+    
+    N = 10000
+
+    print("U:", U)
+    print("d_u:", d_U)
     U_sim = rd.uniform(U - d_U, U + d_U, N)
     I_sim = rd.uniform(I - d_I, I + d_I, N)
-
     R_sim = resistance(U_sim, I_sim)
 
-    e = np.mean(R_sim)
+    e = np.average(R_sim)
     ecart_type = np.std(R_sim)
 
     print("Esperance:", e)
