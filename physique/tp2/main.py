@@ -5,14 +5,9 @@ import csv
 
 def open_csv():
     with open("data.csv", newline="") as csvfile:
-
-        with open("data.csv", newline="") as csvfile:
-            data = list(csv.reader(csvfile))
-            #print(data)
-
-        to_float = lambda x: np.array(x).astype(float)
-
-             
+        data = list(csv.reader(csvfile))
+       
+    to_float = lambda x: np.array(x).astype(float)
     return to_float(data[0]), to_float(data[1]), to_float(data[2]), to_float(data[3])
 
 def analyse(U, I):
