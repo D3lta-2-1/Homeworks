@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 import numpy as np
-#import numpy.polynomial.polynomial as poly
 import csv
 
 def open_csv():
@@ -42,7 +41,7 @@ def regression_monto_carlo(U, u_U, I, u_I):
     a_mean = np.mean(a)
     b_mean = np.mean(b)
 
-    x_model = np.linspace(U[0], U[len(U) - 1], 10)
+    x_model = np.linspace(0, U[len(U) - 1], 10)
     y_model = a_mean * x_model + b_mean
 
     print("mean \n\t a:", a_mean, "b:", b_mean)
@@ -54,7 +53,7 @@ def main():
     U, u_U, I, u_I = open_csv()
     analyse(U, I)
 
-    plt.errorbar(U, I, xerr=u_U, yerr=u_I, fmt='ro-')
+    plt.errorbar(U, I, xerr=u_U *2, yerr=u_I *2, fmt='r+')
 
     x_model, y_model = regression_monto_carlo(U, u_U, I, u_I)
     #x_model, y_model = modelise(U, I)
