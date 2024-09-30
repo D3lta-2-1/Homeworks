@@ -31,29 +31,30 @@ def regression_monto_carlo(x, y, u_x, u_y):
     a_mean = np.mean(a)
     b_mean = np.mean(b)
 
-    x_model = np.linspace(0, x[len(x) - 1], 10)
+    x_model = np.array([0, np.max(x)])
     y_model = a_mean * x_model + b_mean
 
     print("mean \n\t a:", a_mean, "b:", b_mean)
     print("standard deviation \n\t a:", np.std(a), "b:", np.std(b))
 
-    return x_model, y_model
+    return x_model, y_model, a_mean, b_mean
 
 def main():
     incident, reflechi, d_reflechi, refracte, d_refracte = open_csv()
 
-    plt.subplot(211)
+    plt.subplot(121)
     plt.xlabel('angle incident')
     plt.ylabel('angle reflechi')
     plt.errorbar(incident, reflechi, xerr=0, yerr=d_reflechi, fmt='r+')  
 
-    x_model, y_model = regression_monto_carlo(incident, reflechi, 0, d_reflechi)
+    print("pour valider la loi sur la reflexion, a doit etre egal à 1")
+    x_model, y_model, _, _ = regression_monto_carlo(incident, reflechi, 0, d_reflechi)
     plt.plot(x_model, y_model, 'b')
 
     plt.title('r = f(i)')
     plt.grid()
 
-    plt.subplot(212)
+    plt.subplot(122)
     sin_incident = np.sin(np.radians(incident))
     sin_refracte = np.sin(np.radians(refracte))
     sin_d_refracte = np.sin(np.radians(d_refracte))
@@ -61,7 +62,10 @@ def main():
     plt.ylabel('sin angle refracté')
     plt.errorbar(sin_incident, sin_refracte, xerr=0, yerr=sin_d_refracte, fmt='r+')  
 
-    x_model, y_model = regression_monto_carlo(sin_incident, sin_refracte, 0, sin_d_refracte)
+    print("pour valider la loi sur la refraction, la modelisation doit etre une fonction linéaire")
+    print("en supposant que n(air) = 1, n(verre) = 1/a")
+    x_model, y_model, a, _ = regression_monto_carlo(sin_incident, sin_refracte, 0, sin_d_refracte)
+    print("n(verre) =", 1/a)
     plt.plot(x_model, y_model, 'b')
 
     plt.title('sin i2 = f(sin(i))')
