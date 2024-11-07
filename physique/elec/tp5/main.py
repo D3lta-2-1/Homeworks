@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import itertools as it
 
 def read_csv(filename):
     data  = pd.read_csv(filename, delimiter=",")
@@ -17,16 +18,18 @@ def find_slice(data, kind):
     start = 0
     end = 0
     i = 0
-    for a, b in zip(data, data[1:]):
+    #for a, b in zip(data, data[1:]):
+    for a, b, j in it.pairwise(data):
         if np.sign(a) != np.sign(b):
             if np.sign(a) == kind:
                 start = i
             else:
                 end = i
-                return start, end, False
-    return start, end, True
+                return start + 1, end
+        i += 1
+    return start, end
 
-def find_best_slice(data, kind):
+"""def find_best_slice(data, kind):
     start = 0
     end = 0
     
@@ -37,13 +40,12 @@ def find_best_slice(data, kind):
             end = new_end + end
         if should_break:
             break
-    return start, end
-
+    return start, end"""
 
 def main():
     time, bobine, resistor, generator = read_csv("data.csv")
 
-    start, end = find_best_slice(generator, False)
+    start, end = find_slice(generator, True)
 
     print(start, end)
 
