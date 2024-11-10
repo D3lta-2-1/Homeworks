@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import itertools as it
 import scipy.signal as signal
 
-RESISTANCE = 2300 #ohm
+RESISTANCE = 1000 #2300 #ohm
 
 def read_csv(filename):
     data  = pd.read_csv(filename, delimiter=",")
@@ -141,7 +141,7 @@ def draw_log(time, bobine, generator):
     a, b = np.polyfit(time, log_data, 1)
     
     plt.plot(time, a * time + b, 'b-')
-    plt.annotate("1/a = {:}".format(-1/a), (time[-1], log_data[-1]))
+    plt.annotate("1/a = tau = {:}".format(-1/a), (time[-1], log_data[-1]))
     plt.xlabel("""Temps (µs)\n modelisé en bleu\n (95% de la tension)""")
     plt.ylabel("Log de la tension")
     plt.tight_layout()
@@ -154,7 +154,8 @@ def draw_log(time, bobine, generator):
 
     L = tau * 1e-3 * RESISTANCE # 6 would to H but we want mH
 
-    plt.figtext(0,0 ,"En uitilisant la méthode de Monte-Carlo avec Δ = {:.3}V, n = {}\ntau = {:.3} ± {:.3}\nL = {:.0} mH ".format(d, N, tau, u_tau, L))
+    plt.figtext(0,0 ,"En uitilisant la méthode de Monte-Carlo avec Δ = {:.3}V, n = {}\ntau = {:.3} ± {:.3}\nL = {:.3} mH ".format(d, N, tau, u_tau, L))
+    return L
 
 def draw_derivative(time, bobine, resistor, generator):
     start, end = find_slice_and_ignore(generator, 1)
@@ -164,10 +165,34 @@ def draw_derivative(time, bobine, resistor, generator):
 
     derivative = np.gradient(resistor, time)
 
+    quotient = bobine / derivative
+
     plt.subplot(3, 2, 4)
-    plt.title("dUr/dt / Ub")
-    plt.plot(time, derivative / bobine, 'r+')
+    plt.title("(dUr/dt) / Ub")
+    plt.plot(time, quotient, 'r+')
     plt.xlabel("Temps (µs)")
+
+    a, b = np.polyfit(time, quotient, 1)
+
+    plt.plot(time, a * time + b, 'b-')
+    plt.text(0, 0, "b = {:}".format(b))
+    plt.tight_layout()
+
+def energy(time, bobine, resistor, generator, L):
+    start, end = find_slice_and_ignore(generator, 1)
+    bobine = smooth(bobine[start:end])
+    resistor = smooth(resistor[start:end])
+    time = time[start:end]
+
+    i = resistor / RESISTANCE
+
+    e1 = 0.5 * L * 1e-3 * i**2 # mH -> H
+
+    plt.subplot(3, 2, 6)
+    plt.title("Energie en fonction du temps")
+    plt.plot(time, e1, 'r+')
+    plt.xlabel("Temps (µs)")
+    plt.ylabel("Energie (J)")
     plt.tight_layout()
 
 def main():
@@ -178,8 +203,9 @@ def main():
     draw_raw(time, bobine, resistor, generator)
     draw_smoothed_charging(time, bobine, resistor, generator)
     draw_smoothed_decharging(time, bobine, resistor, generator)
-    draw_log(time, bobine, generator)
+    L = draw_log(time, bobine, generator)
     draw_derivative(time, bobine, resistor, generator)
+    energy(time, bobine, resistor, generator, L)
 
     plt.show()
 
