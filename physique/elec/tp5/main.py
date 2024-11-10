@@ -3,8 +3,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import itertools as it
 import scipy.signal as signal
+import sys
 
-RESISTANCE = 1000 #2300 #ohm
+RESISTANCE = 1300 #2300 #ohm
+
+explosed = False
+
 
 def read_csv(filename):
     data  = pd.read_csv(filename, delimiter=",")
@@ -76,13 +80,15 @@ def draw(time, bobine, resistor, generator, title):
     plt.plot(time, bobine, 'r+', label="Bobine")
 
 def draw_raw(time, bobine, resistor, generator):
-    plt.subplot(3, 2, 1)
+
+    plt.figure() if explosed else plt.subplot(3, 2, 1)
     
     draw(time, bobine, resistor, generator, "Valeur brute")
     plt.legend(loc="best")
     plt.tight_layout()
 
 def draw_smoothed_charging(time, bobine, resistor, generator):
+
     start, end = find_slice_and_ignore(generator, 1)
 
     bobine = smooth(bobine[start:end])
@@ -91,7 +97,9 @@ def draw_smoothed_charging(time, bobine, resistor, generator):
     generator = generator[start:end]
 
     tau, x, y = find_time_at(time, bobine, 0.63, False)
-    plt.subplot(3, 2, 3)
+
+    plt.figure() if explosed else plt.subplot(3, 2, 3)
+
     plt.annotate("tau = {:}µs".format(tau), (x, y))
     draw(time, bobine, resistor, generator, "Mise en tension")
     plt.tight_layout()
@@ -104,7 +112,8 @@ def draw_smoothed_decharging(time, bobine, resistor, generator):
     generator = generator[start:end]
     tau, x, y = find_time_at(time[start:end], bobine, 0.63, True)
 
-    plt.subplot(3, 2, 5)
+    plt.figure() if explosed else plt.subplot(3, 2, 5)
+
     plt.annotate("tau = {:}µs".format(tau), (x, y))
     draw(time[start:end], bobine, resistor, generator, "Régime libre ")
     plt.tight_layout()
@@ -127,10 +136,10 @@ def draw_log(time, bobine, generator):
     bobine = smooth(bobine[start:end])
     time = time[start:end]
 
-    plt.subplot(3, 2, 2)
+    plt.figure() if explosed else plt.subplot(3, 2, 2)
     plt.title("Logarithme des valeurs mesurées")
     log_data = np.log(bobine)
-    plt.plot(time, log_data, 'r+')
+    plt.plot(time, log_data, 'r+', label="Logarithme des valeurs mesurées")
 
     index = find_at_index(bobine, 0.95, False) #work on 95% of the charging tension, the rest is noise
     
@@ -139,12 +148,6 @@ def draw_log(time, bobine, generator):
     bobine = bobine[:index]
 
     a, b = np.polyfit(time, log_data, 1)
-    
-    plt.plot(time, a * time + b, 'b-')
-    plt.annotate("1/a = tau = {:}".format(-1/a), (time[-1], log_data[-1]))
-    plt.xlabel("""Temps (µs)\n modelisé en bleu\n (95% de la tension)""")
-    plt.ylabel("Log de la tension")
-    plt.tight_layout()
 
     start, _ = find_slice(generator, -1)
     d = abs(generator[start + 3]- generator[start + 2])
@@ -152,9 +155,13 @@ def draw_log(time, bobine, generator):
     N = 10000
     tau, u_tau = monte_carlo(time, bobine, d, N)
 
-    L = tau * 1e-3 * RESISTANCE # 6 would to H but we want mH
+    L = tau * 1e-3 * RESISTANCE
 
-    plt.figtext(0,0 ,"En uitilisant la méthode de Monte-Carlo avec Δ = {:.3}V, n = {}\ntau = {:.3} ± {:.3}\nL = {:.3} mH ".format(d, N, tau, u_tau, L))
+    plt.plot(time, a * time + b, 'b-', label="Modèle linéaire a = {:.3}, b = {:.3}\n1/a = tau = {:.3}".format(a, b, -1/a) + "En uitilisant la méthode de Monte-Carlo avec Δ = {:.3}V, n = {}\ntau = {:.3} ± {:.3}\nL = {:.4} mH ".format(d, N, tau, u_tau, L))
+    plt.xlabel("""Temps (µs)\n modelisé en bleu\n (95% de la tension)""")
+    plt.ylabel("Log de la tension")
+    plt.legend(loc="best")
+    plt.tight_layout()
     return L
 
 def draw_derivative(time, bobine, resistor, generator):
@@ -167,15 +174,15 @@ def draw_derivative(time, bobine, resistor, generator):
 
     quotient = bobine / derivative
 
-    plt.subplot(3, 2, 4)
-    plt.title("(dUr/dt) / Ub")
-    plt.plot(time, quotient, 'r+')
-    plt.xlabel("Temps (µs)")
-
     a, b = np.polyfit(time, quotient, 1)
 
-    plt.plot(time, a * time + b, 'b-')
-    plt.text(0, 0, "b = {:}".format(b))
+    plt.figure() if explosed else plt.subplot(3, 2, 4)
+    plt.title("(dUr/dt) / Ub")
+    plt.plot(time, quotient, 'r+', label="Quotient (dUr/dt) / Ub")
+    plt.xlabel("Temps (µs)")
+
+    plt.plot(time, a * time + b, 'b-', label="Modèle linéaire a = {:.3}, b = {:.3}".format(a, b))
+    plt.legend(loc="lower left")
     plt.tight_layout()
 
 def energy(time, bobine, resistor, generator, L):
@@ -186,17 +193,43 @@ def energy(time, bobine, resistor, generator, L):
 
     i = resistor / RESISTANCE
 
-    e1 = 0.5 * L * 1e-3 * i**2 # mH -> H
+    # using the formula E = 1/2 L i^2
+    e1 = 0.5 * L * 1e3 * i**2
 
-    plt.subplot(3, 2, 6)
-    plt.title("Energie en fonction du temps")
-    plt.plot(time, e1, 'r+')
+    # using the power 
+    power = i * bobine
+
+    # intergrating power to get energy
+    integrated = 1
+    e2 = np.zeros(len(time))
+    for (t1, t2), (p1, p2), i in zip(it.pairwise(time), it.pairwise(power), it.count()):
+        integrated += (p1 + p2) * (t2 - t1) / 2
+        e2[i] = integrated
+
+    
+    #ax1 = plt.subplot(3, 2, 6)
+    ax1 = plt.subplots()[1] if explosed else plt.subplot(3, 2, 6)
+    plt.title("Energie dans la Bobine en fonction du temps")
     plt.xlabel("Temps (µs)")
-    plt.ylabel("Energie (J)")
+    ax1.set_ylabel("Energie (mJ)")
+    ax1.plot(time, e1, 'c+', label="Energie via Li²/2")
+    ax1.plot(time, e2, 'm+', label="Integration de la puissance\nVia la méthode des trapèzes")
+    ax1.legend(loc="lower right")
+
+
+    ax2 = plt.twinx()
+    ax2.fill_between(time, power, alpha=0.7, label="Puissance") # TODO: fix the scale better than a dirty * 15
+    ax2.set_ylabel("Puissance (W)")
+
+    ax2.legend(loc="lower center")
     plt.tight_layout()
 
 def main():
-    time, bobine, resistor, generator = read_csv("data.csv")
+    time, bobine, resistor, generator = read_csv(sys.argv[1])
+
+    if len(sys.argv) >= 3:
+        global explosed 
+        explosed = sys.argv[2] == "explosed"
 
     time = time * 1e6 #convert to µs
     
