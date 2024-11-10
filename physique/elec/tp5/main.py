@@ -5,7 +5,7 @@ import itertools as it
 import scipy.signal as signal
 import sys
 
-RESISTANCE = 1300 #2300 #ohm
+RESISTANCE = 1300 #ohm
 
 explosed = False
 
@@ -157,7 +157,7 @@ def draw_log(time, bobine, generator):
 
     L = tau * 1e-3 * RESISTANCE
 
-    plt.plot(time, a * time + b, 'b-', label="Modèle linéaire a = {:.3}, b = {:.3}\n1/a = tau = {:.3}".format(a, b, -1/a) + "\nEn uitilisant la méthode de Monte-Carlo\nΔ = {:.3}V, n = {}\ntau = {:.3} ± {:.3}\nL = {:.4} mH ".format(d, N, tau, u_tau, L))
+    plt.plot(time, a * time + b, 'b-', label="Modèle linéaire a = {:.3}, b = {:.3}\n-1/a = tau = {:.3}".format(a, b, -1/a) + "\n\nEn utilisant la méthode de Monte-Carlo\nΔ = {:.3}V, n = {}\ntau = {:.3} ± {:.3}\nL = {:.4} mH ".format(d, N, tau, u_tau, L))
     plt.xlabel("""Temps (µs)\n modelisé en bleu\n (95% de la tension)""")
     plt.ylabel("Log de la tension")
     plt.legend(loc="best")
@@ -222,6 +222,8 @@ def energy(time, bobine, resistor, generator, L):
 
 
     ax2 = plt.subplots()[1] if explosed else plt.twinx()
+    if explosed:
+        ax2.set_ylabel("Puissance (W)")
     ax2.fill_between(time, power, alpha=0.7, label="Puissance")
     ax2.set_ylabel("Puissance (W)")
 
