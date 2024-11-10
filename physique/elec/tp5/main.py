@@ -157,7 +157,7 @@ def draw_log(time, bobine, generator):
 
     L = tau * 1e-3 * RESISTANCE
 
-    plt.plot(time, a * time + b, 'b-', label="Modèle linéaire a = {:.3}, b = {:.3}\n1/a = tau = {:.3}".format(a, b, -1/a) + "En uitilisant la méthode de Monte-Carlo avec Δ = {:.3}V, n = {}\ntau = {:.3} ± {:.3}\nL = {:.4} mH ".format(d, N, tau, u_tau, L))
+    plt.plot(time, a * time + b, 'b-', label="Modèle linéaire a = {:.3}, b = {:.3}\n1/a = tau = {:.3}".format(a, b, -1/a) + "\nEn uitilisant la méthode de Monte-Carlo\nΔ = {:.3}V, n = {}\ntau = {:.3} ± {:.3}\nL = {:.4} mH ".format(d, N, tau, u_tau, L))
     plt.xlabel("""Temps (µs)\n modelisé en bleu\n (95% de la tension)""")
     plt.ylabel("Log de la tension")
     plt.legend(loc="best")
@@ -174,12 +174,16 @@ def draw_derivative(time, bobine, resistor, generator):
 
     quotient = bobine / derivative
 
-    a, b = np.polyfit(time, quotient, 1)
-
     plt.figure() if explosed else plt.subplot(3, 2, 4)
     plt.title("(dUr/dt) / Ub")
     plt.plot(time, quotient, 'r+', label="Quotient (dUr/dt) / Ub")
     plt.xlabel("Temps (µs)")
+
+    index = find_at_index(bobine, 0.95, False) #work on 95% of the charging tension, the rest is noise
+    time = time[:index]
+    quotient = quotient[:index]
+
+    a, b = np.polyfit(time, quotient, 1)
 
     plt.plot(time, a * time + b, 'b-', label="Modèle linéaire a = {:.3}, b = {:.3}".format(a, b))
     plt.legend(loc="lower left")
@@ -187,9 +191,9 @@ def draw_derivative(time, bobine, resistor, generator):
 
 def energy(time, bobine, resistor, generator, L):
     start, end = find_slice_and_ignore(generator, 1)
-    bobine = smooth(bobine[start:end])
-    resistor = smooth(resistor[start:end])
-    time = time[start:end]
+    bobine = smooth(bobine[:])
+    resistor = smooth(resistor[:])
+    time = time[:]
 
     i = resistor / RESISTANCE
 
@@ -217,8 +221,8 @@ def energy(time, bobine, resistor, generator, L):
     ax1.legend(loc="lower right")
 
 
-    ax2 = plt.twinx()
-    ax2.fill_between(time, power, alpha=0.7, label="Puissance") # TODO: fix the scale better than a dirty * 15
+    ax2 = plt.subplots()[1] if explosed else plt.twinx()
+    ax2.fill_between(time, power, alpha=0.7, label="Puissance")
     ax2.set_ylabel("Puissance (W)")
 
     ax2.legend(loc="lower center")
